@@ -1,0 +1,10 @@
+[project]
+name = "telegram-audio-downloader"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic-settings>=2.7.1",
+    "telethon>=1.38.1",
+]
