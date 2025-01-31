@@ -1,6 +1,10 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Get the project root directory
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 
 class Settings(BaseSettings):
@@ -23,7 +27,7 @@ class Settings(BaseSettings):
     DOWNLOAD_ALL: bool = False  # Default to False to only download specified formats
 
     model_config = SettingsConfigDict(
-        env_file="../.env", env_ignore_empty=True, extra="ignore"
+        env_file=str(PROJECT_ROOT / ".env"), env_ignore_empty=True, extra="ignore"
     )
 
 
