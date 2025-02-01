@@ -4,7 +4,11 @@ from functools import lru_cache
 from typing import Optional
 
 from telethon import TelegramClient
-from telethon.tl.types import MessageMediaDocument, MessageMediaPhoto
+from telethon.tl.types import (
+    DocumentAttributeFilename,
+    MessageMediaDocument,
+    MessageMediaPhoto,
+)
 
 from config import settings
 
@@ -28,17 +32,9 @@ def get_file_extension(message) -> Optional[str]:
     if isinstance(message.media, MessageMediaPhoto):
         return ".jpg"
     elif isinstance(message.media, MessageMediaDocument):
-        # Search for DocumentAttributeFilename in attributes
-        filename_attr = next(
-            (
-                attr
-                for attr in message.media.document.attributes
-                if hasattr(attr, "file_name")
-            ),
-            None,
-        )
-        if filename_attr:
-            return f".{filename_attr.file_name.split('.')[-1]}"
+        for attr in message.media.document.attributes:
+            if isinstance(attr, DocumentAttributeFilename):
+                return f".{attr.file_name.split('.')[-1]}"
 
         # Fallback to mime type if available
         mime_type = getattr(message.media.document, "mime_type", "")
@@ -51,6 +47,16 @@ def get_file_extension(message) -> Optional[str]:
         else:
             return ".unknown"
     return None
+
+
+def get_file_name(message) -> str:
+    """Get the original filename from a message"""
+    if isinstance(message.media, MessageMediaDocument):
+        for attr in message.media.document.attributes:
+            if isinstance(attr, DocumentAttributeFilename):
+                return attr.file_name
+    # Fallback to message ID with extension
+    return f"{message.id}{get_file_extension(message)}"
 
 
 @lru_cache()
@@ -78,20 +84,19 @@ async def main():
 
         total, skipped, filtered = 0, 0, 0
 
-        # Modified line: added limit=50 to iter_messages
         async for message in client.iter_messages(channel, limit=50):
             if not message.media:
                 continue
 
-            ext = get_file_extension(message)
-            if not ext:
+            filename = get_file_name(message)
+            if not filename:
                 continue
 
+            ext = os.path.splitext(filename)[1]
             if not should_download_file(ext):
                 filtered += 1
                 continue
 
-            filename = f"{message.id}{ext}"
             filepath = os.path.join(OUTPUT_DIR, filename)
 
             if os.path.exists(filepath):

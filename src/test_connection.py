@@ -1,8 +1,20 @@
 import asyncio
 
+from telegram_downloader import get_file_extension, should_download_file
 from telethon import TelegramClient, errors
+from telethon.tl.types import DocumentAttributeFilename, MessageMediaDocument
 
 from config import settings
+
+
+def get_file_name(message) -> str:
+    """Get the original filename from a message"""
+    if isinstance(message.media, MessageMediaDocument):
+        for attr in message.media.document.attributes:
+            if isinstance(attr, DocumentAttributeFilename):
+                return attr.file_name
+    # Fallback to message ID with extension
+    return f"{message.id}{get_file_extension(message)}"
 
 
 async def test_connection():
@@ -37,6 +49,22 @@ async def test_connection():
         async for message in client.iter_messages(channel, limit=1):
             if message:
                 print(f"📅 Last message date: {message.date}")
+
+        # Test finding latest audio file
+        print("\n⌛ Checking for latest audio file...")
+        latest_audio = None
+        async for message in client.iter_messages(channel, limit=50):
+            if message.media:
+                ext = get_file_extension(message)
+                if ext and should_download_file(ext):
+                    latest_audio = message
+                    break
+
+        if latest_audio:
+            filename = get_file_name(latest_audio)
+            print(f"🎵 Latest audio file found: {filename}")
+        else:
+            print("ℹ️ No audio files found in the last 50 messages")
 
         return True
 
