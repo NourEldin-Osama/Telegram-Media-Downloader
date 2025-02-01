@@ -82,7 +82,9 @@ async def main():
 
         total, skipped, filtered = 0, 0, 0
 
-        async for message in client.iter_messages(channel, limit=50):
+        async for message in client.iter_messages(
+            channel, limit=settings.HISTORY_LIMIT, reverse=settings.REVERSE_ORDER
+        ):
             if not message.media:
                 continue
 
