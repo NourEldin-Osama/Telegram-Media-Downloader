@@ -24,9 +24,6 @@ DOWNLOAD_ALL = settings.DOWNLOAD_ALL
 if not all([API_ID, API_HASH, PHONE_NUMBER, CHANNEL_USERNAME]):
     raise ValueError("Missing required environment variables")
 
-# Configure output directory
-OUTPUT_DIR = f"./{CHANNEL_USERNAME}_media/"
-
 
 def get_file_extension(message) -> Optional[str]:
     if isinstance(message.media, MessageMediaPhoto):
@@ -67,7 +64,7 @@ def should_download_file(ext: str) -> bool:
 
 
 async def main():
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
 
     async with TelegramClient("session_name", int(API_ID), API_HASH) as client:
         await client.start(PHONE_NUMBER)
@@ -97,7 +94,7 @@ async def main():
                 filtered += 1
                 continue
 
-            filepath = os.path.join(OUTPUT_DIR, filename)
+            filepath = os.path.join(str(settings.OUTPUT_DIR), filename)
 
             if os.path.exists(filepath):
                 skipped += 1

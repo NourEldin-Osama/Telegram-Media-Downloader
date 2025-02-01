@@ -25,6 +25,13 @@ class Settings(BaseSettings):
         "opus",  # Opus Audio Format
     ]  # Default audio formats
     DOWNLOAD_ALL: bool = False  # Default to False to only download specified formats
+    OUTPUT_BASE_DIR: str = ""  # Base directory for downloads, empty means use PROJECT_ROOT
+
+    @property
+    def OUTPUT_DIR(self) -> Path:
+        """Get the output directory path for downloaded media"""
+        base_dir = Path(self.OUTPUT_BASE_DIR) if self.OUTPUT_BASE_DIR else PROJECT_ROOT
+        return base_dir / f"{self.CHANNEL_USERNAME}_media"
 
     model_config = SettingsConfigDict(
         env_file=str(PROJECT_ROOT / ".env"), env_ignore_empty=True, extra="ignore"
