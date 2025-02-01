@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 from typing import Optional
 
+from FastTelethon import download_file
 from telethon import TelegramClient
 from telethon.tl.types import (
     DocumentAttributeFilename,
@@ -101,7 +102,8 @@ async def main():
                 continue
 
             try:
-                await client.download_media(message.media, file=filepath)
+                with open(filepath, "wb") as file:
+                    await download_file(client, message.media.document, file)
                 print(f"Downloaded: {filename}")
                 total += 1
             except Exception as e:
