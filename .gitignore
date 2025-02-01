@@ -22,3 +22,6 @@ ENV/
 
 # Local development settings
 .env
+
+# Media files
+**/**_media/

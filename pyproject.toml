@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "cryptg>=0.5.0.post0",
     "pydantic-settings>=2.7.1",
     "telethon>=1.38.1",
 ]

@@ -11,6 +11,20 @@ wheels = [
 ]
 
 [[package]]
+name = "cryptg"
+version = "0.5.0.post0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8f/c8/9570ac88c1f14bc7a944819da523fdcdba54064ac49dd5faec86f8bf4c95/cryptg-0.5.0.post0.tar.gz", hash = "sha256:be5b36e662a73c9b2f1e02e4f0d71b0f97870e514e924d5988d7253a780e3a7b", size = 13395 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/db/bf/e4c730747d9b7c31e56a611c8ad253fe9e7da463caa0bb1c53c7b8a78b03/cryptg-0.5.0.post0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:9dfc86e0a4b200585b0d0a0ab349738f22b8ff9d14621ed7b37a2a415b78c3a5", size = 205191 },
+    { url = "https://files.pythonhosted.org/packages/ba/92/f53785242ecb7f47cf860cdf325cd56e6a9b1d2021b9c05b8d85164075fd/cryptg-0.5.0.post0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9abb52b4d6c275f7148acec5a712c9731280794cd46b4e0fae8c6428f7ba5858", size = 235824 },
+    { url = "https://files.pythonhosted.org/packages/c2/5b/9453e85cf3b7a53c5b91d63329cbf5b0035b7e635a0347280966b949d252/cryptg-0.5.0.post0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:852e88327fc0050c47a1973e0ca33ffb7211c3d739965bff923fc202aeda1567", size = 237433 },
+    { url = "https://files.pythonhosted.org/packages/52/06/8ca293f475a8a374ed1006aa2ae647682f2b1dcb42a0c17dccbf5b47d614/cryptg-0.5.0.post0-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:feb3dc38d1766470239c76ca2f5003d8233d3a179a342e8731d5c5c6c57c08c9", size = 258490 },
+    { url = "https://files.pythonhosted.org/packages/4b/36/6fa10a9d02cae742e69f46349645acdcf939a69058a14b57acbf0ef2fee1/cryptg-0.5.0.post0-cp313-cp313-win32.whl", hash = "sha256:2adfb6ddeb7be5678121e254b7d113e6f25923a8c9c41dff2b7c777eb6b318ff", size = 113199 },
+    { url = "https://files.pythonhosted.org/packages/8b/44/5213eb9fbbc0678b62d20a6e5a0489ed4e2dde4ad6f880ea011cdd21c694/cryptg-0.5.0.post0-cp313-cp313-win_amd64.whl", hash = "sha256:e0666f1d4dc551c1cb86378b7adf4d927a1a79fafd9c25e88bda1de43e6d1f7b", size = 111359 },
+]
+
+[[package]]
 name = "pyaes"
 version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -103,12 +117,14 @@ name = "telegram-audio-downloader"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "cryptg" },
     { name = "pydantic-settings" },
     { name = "telethon" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptg", specifier = ">=0.5.0.post0" },
     { name = "pydantic-settings", specifier = ">=2.7.1" },
     { name = "telethon", specifier = ">=1.38.1" },
 ]
