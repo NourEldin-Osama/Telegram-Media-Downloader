@@ -1,21 +1,9 @@
 import asyncio
 
 from telethon import TelegramClient, errors
-from telethon.tl.types import DocumentAttributeFilename, MessageMediaDocument
 
-from config import settings
-from telegram_downloader import get_file_extension, should_download_file
-
-
-def get_file_name(message) -> str:
-    """Get the original filename from a message"""
-    if isinstance(message.media, MessageMediaDocument):
-        for attr in message.media.document.attributes:
-            if isinstance(attr, DocumentAttributeFilename):
-                return attr.file_name
-    # Fallback to message ID with extension
-    return f"{message.id}{get_file_extension(message)}"
-
+from src.config import settings
+from src.download_manager import DownloadManager
 
 async def test_connection():
     """Test Telegram connection and channel access"""
@@ -26,6 +14,7 @@ async def test_connection():
             api_id=settings.API_ID,
             api_hash=settings.API_HASH,
         )
+        download_manager = DownloadManager(client)
 
         # Test connection
         print("⌛ Connecting to Telegram...")
@@ -49,23 +38,25 @@ async def test_connection():
         async for message in client.iter_messages(channel, limit=1):
             if message:
                 print(f"📅 Last message date: {message.date}")
+                print(f"📝 Last message ID: {message.id}")
 
         # Test finding latest audio file
         print("\n⌛ Checking for latest audio file...")
         latest_audio = None
-        async for message in client.iter_messages(channel, limit=50):
+        async for message in client.iter_messages(channel):
             if message.media:
-                ext = get_file_extension(message)
-                if ext and should_download_file(ext):
+                filename = download_manager.get_file_name(message)
+                if download_manager.should_download_file(filename):
                     latest_audio = message
                     break
 
         if latest_audio:
-            filename = get_file_name(latest_audio)
+            filename = download_manager.get_file_name(latest_audio)
             print(f"🎵 Latest audio file found: {filename}")
         else:
             print("ℹ️ No audio files found in the last 50 messages")
 
+        await client.disconnect()
         return True
 
     except errors.ApiIdInvalidError:
@@ -82,7 +73,6 @@ async def test_connection():
         print(f"❌ Unexpected error: {str(e)}")
 
     return False
-
 
 if __name__ == "__main__":
     print("🚀 Starting connection test...\n")
