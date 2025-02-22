@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     OUTPUT_BASE_DIR: str = (
         ""  # Base directory for downloads, empty means use PROJECT_ROOT
     )
+    MAX_RETRIES: int = 3  # Number of retries for failed downloads
     HISTORY_LIMIT: int = 100  # Number of messages to retrieve
     REVERSE_ORDER: bool = False  # Get messages in reverse order False=newest to oldest, True=oldest to newest
 
