@@ -1,17 +1,9 @@
 import asyncio
-import os
-from functools import lru_cache
-from typing import Optional
 
 from telethon import TelegramClient
-from telethon.tl.types import (
-    DocumentAttributeFilename,
-    MessageMediaDocument,
-    MessageMediaPhoto,
-)
 
 from config import settings
-from FastTelethon import download_file
+from download_manager import DownloadManager
 
 # Get credentials from .env
 API_ID = settings.API_ID
@@ -26,47 +18,7 @@ if not all([API_ID, API_HASH, PHONE_NUMBER, CHANNEL_USERNAME]):
     raise ValueError("Missing required environment variables")
 
 
-def get_file_extension(message) -> Optional[str]:
-    if isinstance(message.media, MessageMediaPhoto):
-        return ".jpg"
-    elif isinstance(message.media, MessageMediaDocument):
-        for attr in message.media.document.attributes:
-            if isinstance(attr, DocumentAttributeFilename):
-                return f".{attr.file_name.split('.')[-1]}"
-
-        # Fallback to mime type if available
-        mime_type = getattr(message.media.document, "mime_type", "")
-        if "image" in mime_type:
-            return ".jpg"
-        elif "audio" in mime_type:
-            return ".mp3"
-        elif "video" in mime_type:
-            return ".mp4"
-        else:
-            return ".unknown"
-    return None
-
-
-def get_file_name(message) -> str:
-    """Get the original filename from a message"""
-    if isinstance(message.media, MessageMediaDocument):
-        for attr in message.media.document.attributes:
-            if isinstance(attr, DocumentAttributeFilename):
-                return attr.file_name
-    # Fallback to message ID with extension
-    return f"{message.id}{get_file_extension(message)}"
-
-
-@lru_cache()
-def should_download_file(ext: str) -> bool:
-    if DOWNLOAD_ALL:
-        return True
-    return ext.lstrip(".").lower() in ALLOWED_FORMATS
-
-
 async def main():
-    os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
-
     async with TelegramClient("session_name", int(API_ID), API_HASH) as client:
         await client.start(PHONE_NUMBER)
 
@@ -80,40 +32,19 @@ async def main():
             f"Allowed formats: {'all' if DOWNLOAD_ALL else ', '.join(ALLOWED_FORMATS)}"
         )
 
-        total, skipped, filtered = 0, 0, 0
+        download_manager = DownloadManager(client)
 
         async for message in client.iter_messages(
             channel, limit=settings.HISTORY_LIMIT, reverse=settings.REVERSE_ORDER
         ):
-            if not message.media:
-                continue
+            success, result = await download_manager.download_file(message)
+            if success:
+                print(f"Downloaded: {result}")
 
-            filename = get_file_name(message)
-            if not filename:
-                continue
-
-            ext = os.path.splitext(filename)[1]
-            if not should_download_file(ext):
-                filtered += 1
-                continue
-
-            filepath = os.path.join(str(settings.OUTPUT_DIR), filename)
-
-            if os.path.exists(filepath):
-                skipped += 1
-                continue
-
-            try:
-                with open(filepath, "wb") as file:
-                    await download_file(client, message.media.document, file)
-                print(f"Downloaded: {filename}")
-                total += 1
-            except Exception as e:
-                print(f"Error downloading {filename}: {str(e)}")
-
-        print(f"\nCompleted: {total} files downloaded")
-        print(f"Skipped: {skipped} existing files")
-        print(f"Filtered: {filtered} files (wrong format)")
+        stats = download_manager.get_stats()
+        print(f"\nCompleted: {stats['total_downloads']} files downloaded")
+        print(f"Skipped: {stats['skipped_files']} existing files")
+        print(f"Filtered: {stats['filtered_files']} files (wrong format)")
 
 
 if __name__ == "__main__":
