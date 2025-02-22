@@ -3,7 +3,6 @@ import os
 from functools import lru_cache
 from typing import Optional
 
-from FastTelethon import download_file
 from telethon import TelegramClient
 from telethon.tl.types import (
     DocumentAttributeFilename,
@@ -12,6 +11,7 @@ from telethon.tl.types import (
 )
 
 from config import settings
+from FastTelethon import download_file
 
 # Get credentials from .env
 API_ID = settings.API_ID

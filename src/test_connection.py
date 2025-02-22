@@ -1,10 +1,10 @@
 import asyncio
 
-from telegram_downloader import get_file_extension, should_download_file
 from telethon import TelegramClient, errors
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaDocument
 
 from config import settings
+from telegram_downloader import get_file_extension, should_download_file
 
 
 def get_file_name(message) -> str:

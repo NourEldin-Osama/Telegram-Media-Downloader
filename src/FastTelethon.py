@@ -9,17 +9,17 @@ import math
 import os
 from collections import defaultdict
 from typing import (
-    Optional,
-    List,
     AsyncGenerator,
-    Union,
     Awaitable,
-    DefaultDict,
-    Tuple,
     BinaryIO,
+    DefaultDict,
+    List,
+    Optional,
+    Tuple,
+    Union,
 )
 
-from telethon import utils, helpers, TelegramClient
+from telethon import TelegramClient, helpers, utils
 from telethon.crypto import AuthKey
 from telethon.network import MTProtoSender
 from telethon.tl.alltlobjects import LAYER
@@ -30,18 +30,18 @@ from telethon.tl.functions.auth import (
 )
 from telethon.tl.functions.upload import (
     GetFileRequest,
-    SaveFilePartRequest,
     SaveBigFilePartRequest,
+    SaveFilePartRequest,
 )
 from telethon.tl.types import (
     Document,
-    InputFileLocation,
     InputDocumentFileLocation,
-    InputPhotoFileLocation,
-    InputPeerPhotoFileLocation,
-    TypeInputFile,
-    InputFileBig,
     InputFile,
+    InputFileBig,
+    InputFileLocation,
+    InputPeerPhotoFileLocation,
+    InputPhotoFileLocation,
+    TypeInputFile,
 )
 
 try:
