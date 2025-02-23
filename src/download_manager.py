@@ -13,6 +13,7 @@ from telethon.tl.types import (
 from src.config import settings
 from src.download_statistics import DownloadStatistics
 from src.FastTelethon import download_file
+from rich.progress import Progress
 
 
 class DownloadManager:
@@ -23,6 +24,7 @@ class DownloadManager:
         self.allowed_formats = settings.ALLOWED_FORMATS
         self.download_all = settings.DOWNLOAD_ALL
         self.max_retries = settings.MAX_RETRIES
+        self.progress = None
 
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -60,18 +62,40 @@ class DownloadManager:
         # Fallback to message ID with extension
         return f"{message.id}{self.get_file_extension(message)}"
 
+    def set_progress(self, progress: Progress):
+        self.progress = progress
+
     async def download_with_retry(
         self, message, filepath, filename
     ) -> Tuple[bool, str]:
         for retry_number in range(1, self.max_retries + 1):
             try:
                 with open(filepath, "wb") as file:
-                    await download_file(self.client, message.media.document, file)
+                    file_size = message.media.document.size
+                    task_id = self.progress.add_task(
+                        f"[magenta]Downloading [bold red]{filename}",
+                        total=file_size,
+                        progress_type="download",
+                    )
+
+                    async def progress_callback(downloaded, total):
+                        self.progress.update(task_id, completed=downloaded)
+
+                    await download_file(
+                        self.client,
+                        message.media.document,
+                        file,
+                        progress_callback=progress_callback,
+                    )
+                    self.progress.update(task_id, description=f"[green]Downloaded [bold red]{filename}")
+                    self.progress.remove_task(task_id)
                 self.statistics.total_downloads += 1
                 return True, filename
             except Exception as e:
                 if retry_number == self.max_retries:
                     self.statistics.failed_downloads += 1
+                    if self.progress and task_id:
+                        self.progress.remove_task(task_id)
                     return (
                         False,
                         f"Error downloading {filename}: {type(e).__name__} - {str(e)}",

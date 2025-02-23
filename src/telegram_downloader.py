@@ -4,6 +4,7 @@ from telethon import TelegramClient
 
 from src.config import settings
 from src.download_manager import DownloadManager
+from src.progress import MultipleProgress
 
 
 class TelegramDownloader:
@@ -35,15 +36,27 @@ class TelegramDownloader:
             f"Allowed formats: {'all' if settings.DOWNLOAD_ALL else ', '.join(settings.ALLOWED_FORMATS)}"
         )
 
-        async for message in self.client.iter_messages(
-            channel, limit=settings.HISTORY_LIMIT, reverse=settings.REVERSE_ORDER
-        ):
-            success, result = await self.download_manager.download_file(message)
-            if success:
-                print(f"Downloaded: {result}")
-            else:
-                if "not allowed" in result:
+        # Get total message count for progress bar
+        total_messages = settings.HISTORY_LIMIT
+
+        with MultipleProgress() as progress:
+            self.download_manager.set_progress(progress)
+            channel_task = progress.add_task(
+                "[bold blue]Processing Messages",
+                total=total_messages,
+                progress_type="total",
+            )
+
+            async for message in self.client.iter_messages(
+                channel, limit=settings.HISTORY_LIMIT, reverse=settings.REVERSE_ORDER
+            ):
+                success, result = await self.download_manager.download_file(message)
+                progress.advance(channel_task)
+                if success:
+                    print(f"Downloaded: {result}")
+                elif "not allowed" in result:
                     print(result)
+            progress.update(channel_task, description="[green]Download Complete 🎉")
 
     def print_statistics(self):
         statistics = self.download_manager.get_statistics()
