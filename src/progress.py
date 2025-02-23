@@ -1,13 +1,14 @@
 from rich.progress import (
-    Progress,
-    TextColumn,
     BarColumn,
-    TaskProgressColumn,
     DownloadColumn,
-    TransferSpeedColumn,
+    Progress,
+    TaskProgressColumn,
+    TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
+    TransferSpeedColumn,
 )
+
 
 class MultipleProgress(Progress):
     def get_renderables(self):

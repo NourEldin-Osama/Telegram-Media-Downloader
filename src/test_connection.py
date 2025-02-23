@@ -5,6 +5,7 @@ from telethon import TelegramClient, errors
 from src.config import settings
 from src.download_manager import DownloadManager
 
+
 async def test_connection():
     """Test Telegram connection and channel access"""
     try:
@@ -73,6 +74,7 @@ async def test_connection():
         print(f"❌ Unexpected error: {str(e)}")
 
     return False
+
 
 if __name__ == "__main__":
     print("🚀 Starting connection test...\n")

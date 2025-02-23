@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 from typing import Optional, Tuple
 
+from rich.progress import Progress
 from telethon import TelegramClient
 from telethon.tl.types import (
     DocumentAttributeFilename,
@@ -13,7 +14,6 @@ from telethon.tl.types import (
 from src.config import settings
 from src.download_statistics import DownloadStatistics
 from src.FastTelethon import download_file
-from rich.progress import Progress
 
 
 class DownloadManager:
@@ -87,7 +87,9 @@ class DownloadManager:
                         file,
                         progress_callback=progress_callback,
                     )
-                    self.progress.update(task_id, description=f"[green]Downloaded [bold red]{filename}")
+                    self.progress.update(
+                        task_id, description=f"[green]Downloaded [bold red]{filename}"
+                    )
                     self.progress.remove_task(task_id)
                 self.statistics.total_downloads += 1
                 return True, filename
