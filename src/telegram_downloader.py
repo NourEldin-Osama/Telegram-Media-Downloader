@@ -32,9 +32,10 @@ class TelegramDownloader:
 
         channel = await self.client.get_entity(self.channel_username)
         print(f"Downloading media from: {channel.title}")
-        print(
-            f"Allowed formats: {'all' if settings.DOWNLOAD_ALL else ', '.join(settings.ALLOWED_FORMATS)}"
-        )
+        if settings.DEBUG:
+            print(
+                f"Allowed formats: {'all' if settings.DOWNLOAD_ALL else ', '.join(settings.ALLOWED_FORMATS)}"
+            )
 
         # Get total message count for progress bar
         total_messages = settings.HISTORY_LIMIT
@@ -54,7 +55,7 @@ class TelegramDownloader:
                 progress.advance(channel_task)
                 if success:
                     print(f"Downloaded: {result}")
-                elif "not allowed" in result:
+                elif "not allowed" in result and settings.DEBUG:
                     print(result)
             progress.update(channel_task, description="[green]Download Complete 🎉")
 
